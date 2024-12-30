@@ -5,10 +5,12 @@ import passport from 'passport'
 import authRoutes from "./Routes/authRoutes.js"
 import session from 'express-session'
 import './Config/passportConfig.js'
+import { isAuthenticated } from './Middlewares/authMiddleware.js'
+
+dotenv.config()
 
 const app = express()
 app.use(express.json());
-dotenv.config()
 
 // MongoDB Connection
 mongoose
@@ -21,7 +23,7 @@ mongoose
 
 app.use(
     session({
-        secret: "secret",
+        secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true,
     })
@@ -36,7 +38,7 @@ app.get('/', (req, res) => {
     return res.send("<a href='/auth/google'>Login with Google</a>");
 });
 
-app.get('/profile', (req, res) => {
+app.get('/profile', isAuthenticated, (req, res) => {
     return res.send(`Welcome ${req.user.userName}`);
 });
 

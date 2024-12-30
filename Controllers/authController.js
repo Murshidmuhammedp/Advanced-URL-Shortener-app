@@ -10,12 +10,14 @@ export const loginSuccess = (req, res) => {
 };
 
 export const logout = (req, res) => {
-    req.logout(err => {
-        if (err) {
-            return res.status(500).json({ message: "Logout failed" });
-        }
-        res.redirect("/");
-        return res.status(200).json({ message: "Logged out successfully" });
+    req.logout(() => {
+        req.session.destroy((err) => {
+            if (err) {
+                return res.status(500).json({ message: "Error during logout" });
+            }
+            res.clearCookie('connect.sid'); 
+            return res.redirect('/'); 
+        });
     });
 };
 
