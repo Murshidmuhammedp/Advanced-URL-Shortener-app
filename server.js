@@ -6,11 +6,21 @@ import authRoutes from "./Routes/authRoutes.js"
 import session from 'express-session'
 import './Config/passportConfig.js'
 import { isAuthenticated } from './Middlewares/authMiddleware.js'
+import rateLimit from 'express-rate-limit'
+import urlRoutes from './Routes/urlRoutes.js'
 
 dotenv.config()
 
 const app = express()
 app.use(express.json());
+
+// Rate Limiter
+const limiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 100,
+    message: "Too many requests,please try again later."
+});
+app.use(limiter);
 
 // MongoDB Connection
 mongoose
@@ -33,6 +43,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", authRoutes);
+app.use("/api", urlRoutes);
 
 app.get('/', (req, res) => {
     return res.send("<a href='/auth/google'>Login with Google</a>");
