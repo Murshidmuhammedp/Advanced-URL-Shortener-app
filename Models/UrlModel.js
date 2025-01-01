@@ -15,7 +15,8 @@ const urlSchema = new mongoose.Schema({
     },
     topic: {
         type: String
-    }, createdAt: {
+    },
+    createdAt: {
         type: Date,
         default: Date.now
     },

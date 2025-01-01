@@ -51,14 +51,14 @@ export const redirectUrl = async (req, res) => {
         if (isLocalIP) {
             geolocation = {
                 status: 'local',
-                message: 'Localhost request - geolocation not applicable.'
+                message: 'Localhost request'
             };
         } else {
             try {
                 const geoRes = await axios.get(`https://ipapi.co/${ip}/json/`);
                 geolocation = geoRes.data;
             } catch (error) {
-                console.error('Geolocation error:', error);
+                console.error('error:', error);
             }
             }
 
