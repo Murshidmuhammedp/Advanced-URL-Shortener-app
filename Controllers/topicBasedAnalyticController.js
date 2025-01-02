@@ -7,6 +7,7 @@ export const topicBasedAnalytics = async (req, res) => {
 
         const cachedAnalytics = await redis.get(`analytics:topic:${topic}`);
         if (cachedAnalytics) {
+            console.log("topic based fetch successfully")
             return res.status(200).json(JSON.parse(cachedAnalytics));
         }
 

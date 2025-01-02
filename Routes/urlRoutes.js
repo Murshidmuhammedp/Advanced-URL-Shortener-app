@@ -8,7 +8,7 @@ import { isAuthenticated } from "../Middlewares/authMiddleware.js";
 const router = express.Router();
 
 // Create Short URL API
-router.post('/shorten/:userId', shortUrl);
+router.post('/shorten/:userId', isAuthenticated, shortUrl);
 
 // Redirect Short URL API
 router.get('/shorten/:alias', redirectUrl);

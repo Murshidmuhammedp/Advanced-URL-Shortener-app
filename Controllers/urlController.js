@@ -53,7 +53,6 @@ export const redirectUrl = async (req, res) => {
 
         let longUrl = await redis.get(alias);
         if (longUrl) {
-            console.log('Cache hit');
             return res.redirect(longUrl)
         };
 
