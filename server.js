@@ -8,6 +8,7 @@ import './Config/passportConfig.js'
 import { isAuthenticated } from './Middlewares/authMiddleware.js'
 import rateLimit from 'express-rate-limit'
 import urlRoutes from './Routes/urlRoutes.js'
+import redis from 'redis'
 
 dotenv.config()
 
@@ -21,6 +22,11 @@ const limiter = rateLimit({
     message: "Too many requests,please try again later."
 });
 app.use(limiter);
+
+
+const redisUrl = 'redis://127.0.0.1:6379';
+
+const client = redis.createClient(redisUrl);
 
 // MongoDB Connection
 mongoose
