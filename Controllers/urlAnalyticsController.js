@@ -1,15 +1,22 @@
+import redis from "../Config/redisConfig.js";
 import URL from "../Models/UrlModel.js";
 
 export const urlAnalytics = async (req, res) => {
     const { alias } = req.params;
     try {
+
+        const cachedAnalytics = await redis.get(`analytics:${alias}`);
+        if (cachedAnalytics) {
+            console.log('Cache hit');
+            return res.status(200).json(JSON.parse(cachedAnalytics));
+        }
+
         const url = await URL.findOne({ alias });
         if (!url) {
             return res.status(404).json({ error: "Short URL not found" })
         }
 
         const totalClicks = url.clicks.length;
-
         const uniqueUsers = new Set(url.clicks.map(click => click.ipAddress)).size;
 
         const clicksByDate = {};

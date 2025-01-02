@@ -1,6 +1,8 @@
 import shortid from "shortid";
 import URL from "../Models/UrlModel.js";
 import axios from "axios";
+import redis from "../Config/redisConfig.js";
+import User from "../Models/UserModel.js";
 
 export const shortUrl = async (req, res) => {
     const { longUrl, customAlias, topic } = req.body;
@@ -10,6 +12,13 @@ export const shortUrl = async (req, res) => {
     }
 
     try {
+        const userId = req.params.userId
+
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        };
+
         let alias = customAlias || shortid.generate();
 
         const existing = await URL.findOne({ alias })
@@ -22,9 +31,12 @@ export const shortUrl = async (req, res) => {
             longUrl,
             shortUrl,
             alias,
-            topic
+            topic,
+            userId: user._id,
         });
 
+        user.url_list.push(newUrl._id);
+        await user.save();
         await newUrl.save();
 
         return res.status(200).json({ shortUrl, createdAt: newUrl.createdAt });
@@ -35,13 +47,20 @@ export const shortUrl = async (req, res) => {
 };
 
 export const redirectUrl = async (req, res) => {
-    const { alias } = req.params;
-
     try {
+
+        const { alias } = req.params;
+
+        let longUrl = await redis.get(alias);
+        if (longUrl) {
+            console.log('Cache hit');
+            return res.redirect(longUrl)
+        };
+
         const url = await URL.findOne({ alias });
 
         if (!url) {
-            return res.status(404).json({ message: "short URL not found" });
+            return res.status(404).json({ message: "URL not found" });
         }
 
         const ip = req.ip;
@@ -60,18 +79,19 @@ export const redirectUrl = async (req, res) => {
             } catch (error) {
                 console.error('error:', error);
             }
-            }
-
-            url.clicks.push({
-                timestamp: new Date(),
-                userAgent: req.headers['user-agent'],
-                ipAddress: ip,
-                geolocation
-            });
-            await url.save();
-
-            res.redirect(url.longUrl);
-        } catch (error) {
-            return res.status(500).json({ error: "Internal Server Error" });
         }
-    };
+
+        url.clicks.push({
+            timestamp: new Date(),
+            userAgent: req.headers['user-agent'],
+            ipAddress: ip,
+            geolocation
+        });
+        await url.save();
+        await redis.set(`url:${alias}`, url.longUrl, 'EX', 3600);
+
+        res.redirect(url.longUrl);
+    } catch (error) {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};

@@ -1,7 +1,15 @@
 import URL from "../Models/UrlModel.js";
+import redis from "../Config/redisConfig.js";
 
 export const overallAnalytics = async (req, res) => {
     try {
+        
+        const cachedAnalytics = await redis.get('analytics:overall');
+        if (cachedAnalytics) {
+            console.log('Cache hit');
+            return res.status(200).json(JSON.parse(cachedAnalytics));
+        }
+
         const urls = await URL.find();
 
         const totalUrls = urls.length;
@@ -37,6 +45,7 @@ export const overallAnalytics = async (req, res) => {
                 deviceType[deviceName].uniqueUsers.add(click.ipAddress);
             });
         });
+        await redis.set('analytics:overall', JSON.stringify(response), 'EX', 300);
 
         return res.status(200).json({
             totalUrls,
