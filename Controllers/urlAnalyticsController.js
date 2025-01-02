@@ -5,9 +5,9 @@ export const urlAnalytics = async (req, res) => {
     const { alias } = req.params;
     try {
 
-        const cachedAnalytics = await redis.get(`analytics:${alias}`);
+        const cachedAnalytics = await redis.get("analytics:urlAnalytics");
         if (cachedAnalytics) {
-            console.log('Cache hit');
+            console.log('url analytics working perfectly');
             return res.status(200).json(JSON.parse(cachedAnalytics));
         }
 
@@ -50,7 +50,7 @@ export const urlAnalytics = async (req, res) => {
             deviceType[deviceName].uniqueUsers.add(click.ipAddress);
         });
 
-        return res.status(200).json({
+        const response = {
             totalClicks,
             uniqueUsers,
             clicksByDate: Object.entries(clicksByDate).map(([date, count]) => ({ date, count })),
@@ -64,7 +64,12 @@ export const urlAnalytics = async (req, res) => {
                 uniqueClicks: data.uniqueClicks,
                 uniqueUsers: data.uniqueUsers.size
             }))
-        });
+        }
+
+        await redis.set('analytics:urlAnalytics', JSON.stringify(response), 'EX', 240);
+
+        return res.status(200).json(response);
+
     } catch (error) {
         console.error(error, "url analytics error");
         return res.status(500).json({ error: 'Internal Server Error' });

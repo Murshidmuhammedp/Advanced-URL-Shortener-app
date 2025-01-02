@@ -3,10 +3,10 @@ import redis from "../Config/redisConfig.js";
 
 export const overallAnalytics = async (req, res) => {
     try {
-        
+
         const cachedAnalytics = await redis.get('analytics:overall');
         if (cachedAnalytics) {
-            console.log('Cache hit');
+            console.log('over all analytics perfectly worked');
             return res.status(200).json(JSON.parse(cachedAnalytics));
         }
 
@@ -24,7 +24,6 @@ export const overallAnalytics = async (req, res) => {
             });
         });
 
-        // OS and Device types
         const osType = {};
         const deviceType = {};
 
@@ -45,9 +44,7 @@ export const overallAnalytics = async (req, res) => {
                 deviceType[deviceName].uniqueUsers.add(click.ipAddress);
             });
         });
-        await redis.set('analytics:overall', JSON.stringify(response), 'EX', 300);
-
-        return res.status(200).json({
+        const response = {
             totalUrls,
             totalClicks,
             uniqueUsers,
@@ -62,7 +59,11 @@ export const overallAnalytics = async (req, res) => {
                 uniqueClicks: data.uniqueClicks,
                 uniqueUsers: data.uniqueUsers.size
             }))
-        });
+        }
+
+        await redis.set('analytics:overall', JSON.stringify(response), 'EX', 240);
+
+        return res.status(200).json(response);
 
     } catch (error) {
         console.error(error);
