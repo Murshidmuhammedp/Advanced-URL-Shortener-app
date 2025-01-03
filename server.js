@@ -8,6 +8,7 @@ import passport from './Config/passportConfig.js'
 import { isAuthenticated } from './Middlewares/authMiddleware.js'
 import rateLimit from 'express-rate-limit'
 import urlRoutes from './Routes/urlRoutes.js'
+import MongoStore from 'connect-mongo'
 
 dotenv.config()
 
@@ -35,7 +36,16 @@ app.use(
     session({
         secret: process.env.SESSION_SECRET,
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
+        store: MongoStore.create({
+            mongoUrl: process.env.MONGO_URI,
+            ttl: 24 * 60 * 60,
+        }),
+        cookie: {
+            secure: false,
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+        }
     })
 );
 
