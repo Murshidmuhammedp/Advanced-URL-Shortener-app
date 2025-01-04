@@ -9,11 +9,15 @@ import { isAuthenticated } from './Middlewares/authMiddleware.js'
 import rateLimit from 'express-rate-limit'
 import urlRoutes from './Routes/urlRoutes.js'
 import MongoStore from 'connect-mongo'
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger-output.json' assert{type:'json'};
 
 dotenv.config()
 
 const app = express()
 app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Rate Limiter
 const limiter = rateLimit({
