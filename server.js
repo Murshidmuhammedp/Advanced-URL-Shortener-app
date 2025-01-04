@@ -10,13 +10,22 @@ import rateLimit from 'express-rate-limit'
 import urlRoutes from './Routes/urlRoutes.js'
 import MongoStore from 'connect-mongo'
 import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './swagger-output.json' assert{type:'json'};
+import swaggerDocument from './swagger-output.json' assert{type: 'json'};
+import cors from 'cors'
 
 dotenv.config()
 
 const app = express()
 app.use(express.json());
 
+// Cors
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Swagger route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Rate Limiter
@@ -67,6 +76,7 @@ app.get('/profile', isAuthenticated, (req, res) => {
     return res.send(`Welcome ${req.user.userName}`);
 });
 
+// Server Running
 const PORT = process.env.PORT || 4321;
 
 app.listen(PORT, () => {

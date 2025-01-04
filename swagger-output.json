@@ -33,152 +33,445 @@
     },
     "/success": {
       "get": {
-        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login Success Endpoint",
+        "description": "This endpoint verifies if a user is authenticated successfully.",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "User authenticated successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "User authenticated successfully",
+                  "user": {
+                    "id": "12345",
+                    "name": "John Doe",
+                    "email": "johndoe@example.com"
+                  }
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Unauthorized"
+                }
+              }
+            }
           }
         }
       }
     },
     "/logout": {
       "get": {
-        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout Endpoint",
+        "description": "This endpoint logs out the user, clears the session, and redirects to the homepage.",
         "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Logout successful"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error - Failed during logout",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Error during logout"
+                }
+              }
+            }
           }
         }
       }
     },
     "/shorten/{userId}": {
       "post": {
-        "description": "",
+        "tags": [
+          "URL Shortener"
+        ],
+        "summary": "Create a Short URL",
+        "description": "This endpoint allows users to create a short URL for a given long URL. It supports custom aliases and categorization by topic.",
         "parameters": [
           {
             "name": "userId",
             "in": "path",
             "required": true,
-            "type": "string"
+            "description": "Unique identifier of the user creating the short URL.",
+            "schema": {
+              "type": "string",
+              "example": "6531a1bde23456789abcd123"
+            }
           },
           {
-            "name": "body",
             "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Request body containing URL details.",
             "schema": {
               "type": "object",
               "properties": {
                 "longUrl": {
-                  "example": "any"
+                  "type": "string",
+                  "description": "The long URL to be shortened.",
+                  "example": "https://example.com/some-long-url"
                 },
                 "customAlias": {
-                  "example": "any"
+                  "type": "string",
+                  "description": "Optional custom alias for the shortened URL.",
+                  "example": "my-custom-alias"
                 },
                 "topic": {
-                  "example": "any"
+                  "type": "string",
+                  "description": "Topic or category for organizing the URL.",
+                  "example": "technology"
                 }
-              }
+              },
+              "required": [
+                "longUrl"
+              ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Short URL successfully created.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "shortUrl": "http://localhost:3000/api/shorten/my-custom-alias",
+                  "createdAt": "2024-11-07T12:00:00.000Z"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request - Validation failed.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "LongUrl is required"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not Found"
+            "description": "User not found.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "User not found"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error - An unexpected error occurred.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal Server Error"
+                }
+              }
+            }
           }
         }
       }
     },
     "/shorten/{alias}": {
       "get": {
-        "description": "",
+        "tags": [
+          "URL Shortener"
+        ],
+        "summary": "Redirect to Long URL",
+        "description": "Redirects to the original long URL associated with the provided alias. Tracks click details, including timestamp, user-agent, IP address, and geolocation.",
         "parameters": [
           {
             "name": "alias",
             "in": "path",
             "required": true,
-            "type": "string"
+            "description": "The alias for the shortened URL.",
+            "schema": {
+              "type": "string",
+              "example": "my-custom-alias"
+            }
           },
           {
             "name": "user-agent",
             "in": "header",
-            "type": "string"
+            "description": "User-Agent header for identifying the browser or client making the request.",
+            "schema": {
+              "type": "string",
+              "example": "Mozilla/5.0"
+            }
           }
         ],
         "responses": {
+          "302": {
+            "description": "Found - Redirects to the long URL.",
+            "headers": {
+              "Location": {
+                "description": "Redirect URL",
+                "schema": {
+                  "type": "string",
+                  "example": "https://example.com/some-long-url"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found - Alias does not exist.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "URL not found"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error - An unexpected error occurred.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal Server Error"
+                }
+              }
+            }
           }
         }
       }
     },
     "/analytics/{alias}": {
       "get": {
-        "description": "",
+        "tags": [
+          "URL Analytics"
+        ],
+        "summary": "Get Analytics for Shortened URL",
+        "description": "Fetch analytics data for a specific shortened URL, including total clicks, unique users, clicks by date, OS types, and device types.",
         "parameters": [
           {
             "name": "alias",
             "in": "path",
             "required": true,
-            "type": "string"
+            "description": "The alias for the shortened URL.",
+            "schema": {
+              "type": "string",
+              "example": "my-custom-alias"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Successful response with analytics data.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "totalClicks": 120,
+                  "uniqueUsers": 85,
+                  "clicksByDate": [
+                    {
+                      "date": "2024-01-01",
+                      "count": 20
+                    },
+                    {
+                      "date": "2024-01-02",
+                      "count": 15
+                    }
+                  ],
+                  "osType": [
+                    {
+                      "osName": "Windows",
+                      "uniqueClicks": 50,
+                      "uniqueUsers": 40
+                    },
+                    {
+                      "osName": "Mac OS",
+                      "uniqueClicks": 30,
+                      "uniqueUsers": 20
+                    }
+                  ],
+                  "deviceType": [
+                    {
+                      "deviceName": "Mobile",
+                      "uniqueClicks": 70,
+                      "uniqueUsers": 50
+                    },
+                    {
+                      "deviceName": "Desktop",
+                      "uniqueClicks": 50,
+                      "uniqueUsers": 35
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not Found"
+            "description": "Short URL not found.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Short URL not found"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal Server Error"
+                }
+              }
+            }
           }
         }
       }
     },
     "/analytics/topic/{topic}": {
       "get": {
-        "description": "",
+        "tags": [
+          "Topic Analytics"
+        ],
+        "summary": "Get Analytics by Topic",
+        "description": "Fetch analytics for URLs associated with a specific topic, including total clicks, unique users, clicks by date, and individual URL details.",
         "parameters": [
           {
             "name": "topic",
             "in": "path",
             "required": true,
-            "type": "string"
+            "description": "The topic associated with the URLs.",
+            "schema": {
+              "type": "string",
+              "example": "technology"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Successful response with topic-based analytics data.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "totalClicks": 150,
+                  "uniqueUsers": 100,
+                  "clicksByDate": [
+                    {
+                      "date": "2024-01-01",
+                      "totalClick": 25
+                    },
+                    {
+                      "date": "2024-01-02",
+                      "totalClick": 30
+                    }
+                  ],
+                  "urls": [
+                    {
+                      "shortUrl": "https://short.ly/abc123",
+                      "totalClicks": 50,
+                      "uniqueUsers": 40
+                    },
+                    {
+                      "shortUrl": "https://short.ly/xyz456",
+                      "totalClicks": 100,
+                      "uniqueUsers": 80
+                    }
+                  ]
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal Server Error"
+                }
+              }
+            }
           }
         }
       }
     },
     "/analytic/overall": {
       "get": {
-        "description": "",
+        "tags": [
+          "Overall Analytics"
+        ],
+        "summary": "Get Overall Analytics",
+        "description": "Fetch overall analytics for all URLs, including total clicks, unique users, clicks by date, OS types, and device types.",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Successful response with overall analytics data.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "totalUrls": 120,
+                  "totalClicks": 4500,
+                  "uniqueUsers": 3200,
+                  "clicksByDate": [
+                    {
+                      "date": "2024-01-01",
+                      "count": 300
+                    },
+                    {
+                      "date": "2024-01-02",
+                      "count": 400
+                    }
+                  ],
+                  "osType": [
+                    {
+                      "osName": "Windows",
+                      "uniqueClicks": 2000,
+                      "uniqueUsers": 1500
+                    },
+                    {
+                      "osName": "Android",
+                      "uniqueClicks": 1000,
+                      "uniqueUsers": 800
+                    }
+                  ],
+                  "deviceType": [
+                    {
+                      "deviceName": "Desktop",
+                      "uniqueClicks": 3000,
+                      "uniqueUsers": 2300
+                    },
+                    {
+                      "deviceName": "Mobile",
+                      "uniqueClicks": 1500,
+                      "uniqueUsers": 900
+                    }
+                  ]
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Internal Server Error"
+                }
+              }
+            }
           }
         }
       }
