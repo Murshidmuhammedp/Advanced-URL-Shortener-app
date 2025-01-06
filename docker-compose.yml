@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  app:
+    image: murshidmuhammed/thealteroffice
+    ports:
+      - "5645:5645"
+    depends_on:
+      - redis
+      - db
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  db:
+    image: mongo
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+volumes:
+  mongodb_data:
