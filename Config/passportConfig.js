@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import User from "../Models/UserModel.js";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 dotenv.config();
 
 passport.serializeUser((user, done) => {
@@ -32,7 +33,14 @@ passport.use(
                         email: profile.emails[0].value,
                     });
                 }
+                const token = jwt.sign({ id: user._id, email: user.email },
+                    process.env.JWT_SECRET, { expiresIn: "1h" }
+                );
 
+                user.token = token;
+                await user.save();
+                console.log("Access Token:", token);
+                
                 return done(null, user);
             } catch (error) {
                 console.error(error);
