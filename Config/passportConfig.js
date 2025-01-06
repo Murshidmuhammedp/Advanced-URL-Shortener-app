@@ -33,6 +33,7 @@ passport.use(
                         email: profile.emails[0].value,
                     });
                 }
+                // JWT Token 
                 const token = jwt.sign({ id: user._id, email: user.email },
                     process.env.JWT_SECRET, { expiresIn: "1h" }
                 );
@@ -40,7 +41,7 @@ passport.use(
                 user.token = token;
                 await user.save();
                 console.log("Access Token:", token);
-                
+
                 return done(null, user);
             } catch (error) {
                 console.error(error);

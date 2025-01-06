@@ -13,20 +13,37 @@
   "paths": {
     "/google": {
       "get": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Initiate Google OAuth Login",
+        "description": "Starts the Google OAuth authentication process by redirecting the user to Google's login page.",
         "responses": {
-          "default": {
-            "description": ""
+          "302": {
+            "description": "Redirects to Google's OAuth login page."
+          },
+          "500": {
+            "description": "Internal Server Error."
           }
         }
       }
     },
     "/google/callback": {
       "get": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Google OAuth Callback",
+        "description": "Handles the callback from Google OAuth authentication and redirects the user to the success page with a token.",
         "responses": {
-          "default": {
-            "description": ""
+          "302": {
+            "description": "Redirects to success page with token or profile page on successful authentication."
+          },
+          "401": {
+            "description": "Unauthorized - Authentication failed."
+          },
+          "500": {
+            "description": "Internal Server Error."
           }
         }
       }

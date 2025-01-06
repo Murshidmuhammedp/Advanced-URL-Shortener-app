@@ -1,7 +1,6 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
-// import passport from 'passport'
 import authRoutes from "./Routes/authRoutes.js"
 import session from 'express-session'
 import passport from './Config/passportConfig.js'
@@ -45,6 +44,7 @@ mongoose
         console.log(err)
     });
 
+// Session 
 app.use(
     session({
         secret: process.env.SESSION_SECRET,

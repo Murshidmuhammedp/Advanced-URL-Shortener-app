@@ -33,7 +33,11 @@ const urlSchema = new mongoose.Schema({
         userAgent: String,
         ipAddress: String,
         geolocation: Object
-    }]
+    }],
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 const URL = mongoose.model("URL", urlSchema);
